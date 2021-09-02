@@ -6,7 +6,7 @@
 /*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 19:49:19 by cclaude           #+#    #+#             */
-/*   Updated: 2021/09/01 19:49:30 by cclaude          ###   ########.fr       */
+/*   Updated: 2021/09/01 23:21:39 by cclaude          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,10 @@ int atoi_i (char *str, int *i)
 int is_ip (char *str)
 {
 	int i = 0;
-	int n;
 
 	for (int x = 0 ; x < 4 ; x++)
 	{
-		n = atoi_i(str, &i);
+		int n = atoi_i(str, &i);
 		if (n < 0 || n > 255)
 			return (1);
 

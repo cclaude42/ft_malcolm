@@ -45,4 +45,7 @@ fclean:
 
 re: fclean all
 
+test: re
+	sudo ./ft_malcolm 10.10.10.10 aa:aa:aa:aa:aa:aa 10.10.10.10 aa:aa:aa:aa:aa:aa
+
 .PHONY: clean fclean re

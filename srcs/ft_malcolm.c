@@ -6,7 +6,7 @@
 /*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 18:43:59 by cclaude           #+#    #+#             */
-/*   Updated: 2021/09/08 03:32:23 by cclaude          ###   ########.fr       */
+/*   Updated: 2021/09/08 14:10:41 by cclaude          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,13 +50,23 @@ int main (int ac, char **av)
 	int packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	printf("Connected on socket : %d\n\n", packet_socket);
 
+	struct hostent *ent = gethostbyname(av[1]);
+	printf("Hostent contents\nName : %s\n", ent->h_name);
+	for (int i = 0 ; ent->h_aliases[i] ; i++)
+		printf("Alias : %s\n", ent->h_aliases[i]);
+	printf("Address type : %d\n", ent->h_addrtype);
+	printf("Address length : %d\n", ent->h_length);
+	for (int i = 0 ; ent->h_addr_list[i] ; i++)
+		printf("Address list : %s\n", ent->h_addr_list[i]);
+	printf("\n");
 
 	struct ifaddrs *ifaddr;
 	getifaddrs(&ifaddr);
 	for (struct ifaddrs *ifa = ifaddr ; ifa != NULL ; ifa = ifa->ifa_next)
-		printf("Interface : %s\n", ifa->ifa_name);
+		printf("Interface : %s, %d (PF_INET = 2, PF_INET6 = 10, PF_PACKET = 17...)\n", ifa->ifa_name, ifa->ifa_addr->sa_family);
 	freeifaddrs(ifaddr);
-	printf("Option : %d\n", setsockopt(packet_socket, SOL_SOCKET, SO_BINDTODEVICE, "lo", 2));
+	// printf("setsockopt ret : %d\n", setsockopt(packet_socket, SOL_SOCKET, SO_BINDTODEVICE, "br-04e35d30a215", 15));
+	printf("\n");
 
 	while (1)
 	{
@@ -84,8 +94,7 @@ int main (int ac, char **av)
 
 				print_arp(eth, arp);
 
-				packet_len = sendto(packet_socket, packet, ETHER_HDR_LEN + ETHER_ARP_LEN, 0, NULL, 0);
-				// packet_len = send(packet_socket, "Hello!\n", 7, 0);
+				packet_len = sendto(packet_socket, packet, ETHER_HDR_LEN + ETHER_ARP_LEN, 0, , );
 				printf("Sent : %d\n\n", packet_len);
 				if (packet_len == -1)
 					perror("Oops ");

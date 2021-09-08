@@ -6,11 +6,41 @@
 /*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 18:43:59 by cclaude           #+#    #+#             */
-/*   Updated: 2021/09/08 01:09:43 by cclaude          ###   ########.fr       */
+/*   Updated: 2021/09/08 03:32:23 by cclaude          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malcolm.h"
+
+void print_arp (struct ethhdr *eth, struct ether_arp *arp)
+{
+	printf("> Full breakdown :\n");
+	printf("> eth->h_dest          %.6s            (%02X:%02X:%02X:%02X:%02X:%02X)\n", eth->h_dest, eth->h_dest[0], eth->h_dest[1], eth->h_dest[2], eth->h_dest[3], eth->h_dest[4], eth->h_dest[5]);
+	printf("> eth->h_source        %.6s            (%02X:%02X:%02X:%02X:%02X:%02X)\n", eth->h_source, eth->h_source[0], eth->h_source[1], eth->h_source[2], eth->h_source[3], eth->h_source[4], eth->h_source[5]);
+	printf("> eth->h_proto         %04X            (0806 for ARP)\n", ntohs(eth->h_proto));
+	printf("> arp->ea_hdr.ar_hrd   %-10u      (1 for Ethernet)\n", ntohs(arp->ea_hdr.ar_hrd));
+	printf("> arp->ea_hdr.ar_pro   %-10u      (2048 for IP)\n", ntohs(arp->ea_hdr.ar_pro));
+	printf("> arp->ea_hdr.ar_hln   %-10u      (6 for MAC)\n", arp->ea_hdr.ar_hln);
+	printf("> arp->ea_hdr.ar_pln   %-10u      (4 for IPv4)\n", arp->ea_hdr.ar_pln);
+	printf("> arp->ea_hdr.ar_op    %-10u      (1 for request, 2 for reply)\n", ntohs(arp->ea_hdr.ar_op));
+	printf("> arp->arp_sha         %.6s            (%02X:%02X:%02X:%02X:%02X:%02X)\n", arp->arp_sha, arp->arp_sha[0], arp->arp_sha[1], arp->arp_sha[2], arp->arp_sha[3], arp->arp_sha[4], arp->arp_sha[5]);
+	printf("> arp->arp_spa         %-10u      (%d.%d.%d.%d)\n", *(unsigned int *)arp->arp_spa, arp->arp_spa[0], arp->arp_spa[1], arp->arp_spa[2], arp->arp_spa[3]);
+	printf("> arp->arp_tha         %.6s            (%02X:%02X:%02X:%02X:%02X:%02X)\n", arp->arp_tha, arp->arp_tha[0], arp->arp_tha[1], arp->arp_tha[2], arp->arp_tha[3], arp->arp_tha[4], arp->arp_tha[5]);
+	printf("> arp->arp_tpa         %-10u      (%d.%d.%d.%d)\n\n", *(unsigned int *)arp->arp_tpa, arp->arp_tpa[0], arp->arp_tpa[1], arp->arp_tpa[2], arp->arp_tpa[3]);
+}
+
+int hex_value (char c)
+{
+	if (c >= 'a')
+		return (c - 'W');
+	return (c - '0');
+}
+
+void fill_mac (unsigned char *addr, char *mac)
+{
+	for (int i = 0, j = 0 ; i < 6 ; i++, j += 3)
+		addr[i] = 16 * hex_value(mac[j]) + hex_value(mac[j + 1]);
+}
 
 int main (int ac, char **av)
 {
@@ -18,7 +48,15 @@ int main (int ac, char **av)
 		return (1);
 
 	int packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-	printf("Connected on socket : %d\n", packet_socket);
+	printf("Connected on socket : %d\n\n", packet_socket);
+
+
+	struct ifaddrs *ifaddr;
+	getifaddrs(&ifaddr);
+	for (struct ifaddrs *ifa = ifaddr ; ifa != NULL ; ifa = ifa->ifa_next)
+		printf("Interface : %s\n", ifa->ifa_name);
+	freeifaddrs(ifaddr);
+	printf("Option : %d\n", setsockopt(packet_socket, SOL_SOCKET, SO_BINDTODEVICE, "lo", 2));
 
 	while (1)
 	{
@@ -31,26 +69,28 @@ int main (int ac, char **av)
 		{
 			struct ethhdr *eth = (struct ethhdr *)packet;
 			struct ether_arp *arp = (struct ether_arp *)(packet + ETHER_HDR_LEN);
-			if (ntohs(eth->h_proto) == ETH_P_ARP)
+			if (ntohs(eth->h_proto) == ETH_P_ARP && ntohs(arp->ea_hdr.ar_op) == ARPOP_REQUEST)
 			{
-				printf("Found ARP request ! (size %d)\n", packet_len);
-				printf("|- Sender MAC : %02X:%02X:%02X:%02X:%02X:%02X\n", arp->arp_sha[0], arp->arp_sha[1], arp->arp_sha[2], arp->arp_sha[3], arp->arp_sha[4], arp->arp_sha[5]);
-				printf("|- Sender IP : %d.%d.%d.%d\n", arp->arp_spa[0], arp->arp_spa[1], arp->arp_spa[2], arp->arp_spa[3]);
-				printf("|- Target MAC : %02X:%02X:%02X:%02X:%02X:%02X\n", arp->arp_tha[0], arp->arp_tha[1], arp->arp_tha[2], arp->arp_tha[3], arp->arp_tha[4], arp->arp_tha[5]);
-				printf("|- Target IP : %d.%d.%d.%d\n", arp->arp_tpa[0], arp->arp_tpa[1], arp->arp_tpa[2], arp->arp_tpa[3]);
-				printf("> Full breakdown :\n");
-				printf("> eth->h_dest %.6s\n", eth->h_dest);
-				printf("> eth->h_source %.6s\n", eth->h_source);
-				printf("> eth->h_proto %04X\n", eth->h_proto);
-				printf("> arp->ea_hdr.ar_hrd %u\n", ntohs(arp->ea_hdr.ar_hrd));
-				printf("> arp->ea_hdr.ar_pro %u\n", ntohs(arp->ea_hdr.ar_pro));
-				printf("> arp->ea_hdr.ar_hln %u\n", arp->ea_hdr.ar_hln);
-				printf("> arp->ea_hdr.ar_pln %u\n", arp->ea_hdr.ar_pln);
-				printf("> arp->ea_hdr.ar_op %u\n", ntohs(arp->ea_hdr.ar_op));
-				printf("> arp->arp_sha %.6s\n", arp->arp_sha);
-				printf("> arp->arp_spa %u\n", *(unsigned int *)arp->arp_spa);
-				printf("> arp->arp_tha %.6s\n", arp->arp_tha);
-				printf("> arp->arp_tpa %u\n\n", *(unsigned int *)arp->arp_tpa);
+				printf("Received ARP request !\n\n");
+				print_arp(eth, arp);
+
+				arp->ea_hdr.ar_op = htons(ARPOP_REPLY);
+				*(unsigned int *)arp->arp_spa = inet_addr(av[1]);
+				fill_mac(eth->h_source, av[2]);
+				fill_mac(arp->arp_sha, av[2]);
+				*(unsigned int *)arp->arp_tpa = inet_addr(av[3]);
+				fill_mac(eth->h_dest, av[4]);
+				fill_mac(arp->arp_tha, av[4]);
+
+				print_arp(eth, arp);
+
+				packet_len = sendto(packet_socket, packet, ETHER_HDR_LEN + ETHER_ARP_LEN, 0, NULL, 0);
+				// packet_len = send(packet_socket, "Hello!\n", 7, 0);
+				printf("Sent : %d\n\n", packet_len);
+				if (packet_len == -1)
+					perror("Oops ");
+
+				break ;
 			}
 		}
 	}

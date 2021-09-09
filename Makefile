@@ -46,6 +46,6 @@ fclean:
 re: fclean all
 
 test: re
-	sudo ./ft_malcolm 192.168.1.41 ca:ca:fe:fe:00:00 1.2.3.4 da:ba:be:da:ba:be
+	sudo ./ft_malcolm 192.168.1.99 aa:bb:cc:dd:ee:ff 192.168.1.78 dc:85:de:fc:e5:a3
 
 .PHONY: clean fclean re

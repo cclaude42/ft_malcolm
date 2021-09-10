@@ -6,7 +6,7 @@
 /*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 18:43:59 by cclaude           #+#    #+#             */
-/*   Updated: 2021/09/09 03:26:04 by cclaude          ###   ########.fr       */
+/*   Updated: 2021/09/10 19:34:46 by cclaude          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,12 @@ void fill_mac (unsigned char *addr, char *mac)
 
 #include <string.h>
 
+// TO DO :
+// - REARRANGE STUFF
+// - GET MAC FROM IF FOR H_SOURCE
+// - CHECK IP FROM ARP REQUEST
+// - BIND TO IF TO REMOVE ADDR ARG FROM SENTO ?
+
 int main (int ac, char **av)
 {
 	if (error_check(ac, av))
@@ -100,19 +106,10 @@ int main (int ac, char **av)
 	// struct hostent *ent = gethostbyname(av[1]);
 	// print_hostent(ent);
 
-	struct ifaddrs *ifaddr;
-	getifaddrs(&ifaddr);
-	// print_ifaddrs(ifaddr);
-	// freeifaddrs(ifaddr);
-	struct ifaddrs *ifa = ifaddr;
-	while (ifa && (ifa->ifa_addr->sa_family != PF_PACKET || ((struct sockaddr_ll *)ifa->ifa_addr)->sll_hatype != 1))
-		ifa = ifa->ifa_next;
-	printf("Selected interface : %s (should be %d : %d)\n\n", ifa->ifa_name, PF_PACKET, ifa->ifa_addr->sa_family);
-
-	if (setsockopt(packet_socket, SOL_SOCKET, SO_BINDTODEVICE, ifa->ifa_name, strlen(ifa->ifa_name)) == 0)
-		printf("Successfully used setsockopt to bind socket to %s\n\n", ifa->ifa_name);
-	else
-		printf("setsockopt failed !\n\n");
+	// if (setsockopt(packet_socket, SOL_SOCKET, SO_BINDTODEVICE, ifa->ifa_name, strlen(ifa->ifa_name)) == 0)
+	// 	printf("Successfully used setsockopt to bind socket to %s\n\n", ifa->ifa_name);
+	// else
+	// 	printf("setsockopt failed !\n\n");
 
 	while (1)
 	{
@@ -134,7 +131,7 @@ int main (int ac, char **av)
 
 				arp->ea_hdr.ar_op = htons(ARPOP_REPLY);
 				*(unsigned int *)arp->arp_spa = inet_addr(av[1]);
-				fill_mac(eth->h_source, av[2]);
+				fill_mac(eth->h_source, "60:f2:62:c7:5d:c6");
 				fill_mac(arp->arp_sha, av[2]);
 				*(unsigned int *)arp->arp_tpa = inet_addr(av[3]);
 				fill_mac(eth->h_dest, av[4]);
@@ -146,9 +143,21 @@ int main (int ac, char **av)
 				printf("Sockaddr_ll from recvfrom :\n");
 				print_addrll(&addr);
 
-				memcpy(addr.sll_addr, ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr, 6);
-				addr.sll_ifindex = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_ifindex;
+				struct ifaddrs *ifaddr;
+				getifaddrs(&ifaddr);
+				// print_ifaddrs(ifaddr);
+				// freeifaddrs(ifaddr);
+				struct ifaddrs *ifa = ifaddr;
+				while (ifa && ((struct sockaddr_ll *)ifa->ifa_addr)->sll_ifindex != addr.sll_ifindex)
+					ifa = ifa->ifa_next;
+
+				printf("Selected interface : %s (should be %d : %d)\n\n", ifa->ifa_name, PF_PACKET, ifa->ifa_addr->sa_family);
+
+				// fill_mac(addr.sll_addr, "aa:bb:cc:dd:ee:ff");
+				// memcpy(addr.sll_addr, ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr, 8);
+				// addr.sll_ifindex = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_ifindex;
 				// fill_mac(addr.sll_addr, av[4]);
+				freeifaddrs(ifaddr);
 
 				printf("Modified sockaddr_ll (for sendto) :\n");
 				print_addrll(&addr);
@@ -163,7 +172,6 @@ int main (int ac, char **av)
 		}
 	}
 
-	freeifaddrs(ifaddr);
 	close(packet_socket);
 
 	return (0);

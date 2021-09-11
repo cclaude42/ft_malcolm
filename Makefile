@@ -10,7 +10,7 @@ CFLAGS = -Wall -Wextra -Werror
 
 INCLUDES = -I includes
 
-FILES = ft_malcolm error
+FILES = ft_malcolm error tools print
 
 SRC = $(addsuffix .c, $(addprefix srcs/, $(FILES))) \
 

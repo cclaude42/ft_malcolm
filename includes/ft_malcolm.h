@@ -6,7 +6,7 @@
 /*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/01 19:49:40 by cclaude           #+#    #+#             */
-/*   Updated: 2021/09/08 22:04:54 by cclaude          ###   ########.fr       */
+/*   Updated: 2021/09/11 19:32:50 by cclaude          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,14 @@
 # define ETHER_ARP_LEN sizeof(struct ether_arp)
 
 int error_check (int ac, char **av);
+
+int hex_value (char c);
+void fill_mac (unsigned char *addr, char *mac);
+void memcopy (unsigned char *src, unsigned char *dst, size_t n);
+
+void print_arp (struct ethhdr *eth, struct ether_arp *arp);
+void print_hostent (struct hostent *ent);
+void print_addrll (struct sockaddr_ll *addr);
+void print_ifaddrs (struct ifaddrs *ifaddr);
 
 #endif

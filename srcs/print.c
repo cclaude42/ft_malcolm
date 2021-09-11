@@ -6,7 +6,7 @@
 /*   By: cclaude <cclaude@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/11 19:26:05 by cclaude           #+#    #+#             */
-/*   Updated: 2021/09/11 19:26:23 by cclaude          ###   ########.fr       */
+/*   Updated: 2021/09/11 20:31:44 by cclaude          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ void print_arp (struct ethhdr *eth, struct ether_arp *arp)
 	printf(" > eth->h_dest          %02X:%02X:%02X:%02X:%02X:%02X\n", eth->h_dest[0], eth->h_dest[1], eth->h_dest[2], eth->h_dest[3], eth->h_dest[4], eth->h_dest[5]);
 	printf(" > eth->h_source        %02X:%02X:%02X:%02X:%02X:%02X\n", eth->h_source[0], eth->h_source[1], eth->h_source[2], eth->h_source[3], eth->h_source[4], eth->h_source[5]);
 	printf(" > eth->h_proto         %04X                 (0806 for ARP)\n", ntohs(eth->h_proto));
+	printf(" =======================\n");
 	printf(" > arp->ea_hdr.ar_hrd   %-20u (1 for Ethernet)\n", ntohs(arp->ea_hdr.ar_hrd));
 	printf(" > arp->ea_hdr.ar_pro   %-20u (2048 for IP)\n", ntohs(arp->ea_hdr.ar_pro));
 	printf(" > arp->ea_hdr.ar_hln   %-20u (6 for MAC)\n", arp->ea_hdr.ar_hln);
@@ -29,47 +30,14 @@ void print_arp (struct ethhdr *eth, struct ether_arp *arp)
 	printf("\n");
 }
 
-void print_hostent (struct hostent *ent)
-{
-	printf("Hostent contents\n");
-	printf("Name : %s\n", ent->h_name);
-	for (int i = 0 ; ent->h_aliases[i] ; i++)
-		printf("Alias : %s\n", ent->h_aliases[i]);
-	printf("Address type : %d\n", ent->h_addrtype);
-	printf("Address length : %d\n", ent->h_length);
-	for (int i = 0 ; ent->h_addr_list[i] ; i++)
-		printf("Address list : %s\n", ent->h_addr_list[i]);
-	printf("\n");
-}
-
 void print_addrll (struct sockaddr_ll *addr)
 {
-	printf(" > addr->sll_family %hu\n", addr->sll_family);
-	printf(" > addr->sll_protocol %hu\n", addr->sll_protocol);
-	printf(" > addr->sll_ifindex %d\n", addr->sll_ifindex);
-	printf(" > addr->sll_hatype %hu\n", addr->sll_hatype);
-	printf(" > addr->sll_pkttype %d\n", addr->sll_pkttype);
-	printf(" > addr->sll_halen %d\n", addr->sll_halen);
-	printf(" > addr->sll_addr %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", addr->sll_addr[0], addr->sll_addr[1], addr->sll_addr[2], addr->sll_addr[3], addr->sll_addr[4], addr->sll_addr[5], addr->sll_addr[6], addr->sll_addr[7]);
-	printf("\n");
-}
-
-void print_ifaddrs (struct ifaddrs *ifaddr)
-{
-	printf("Available interfaces :\n");
-	for (struct ifaddrs *ifa = ifaddr ; ifa != NULL ; ifa = ifa->ifa_next)
-	{
-		if (ifa->ifa_addr->sa_family == PF_PACKET)
-		{
-			printf("- %s (PF_PACKET)\n", ifa->ifa_name);
-			print_addrll((struct sockaddr_ll *)ifa->ifa_addr);
-		}
-		else if (ifa->ifa_addr->sa_family == PF_INET)
-			printf("- %s (PF_INET)\n", ifa->ifa_name);
-		else if (ifa->ifa_addr->sa_family == PF_INET6)
-			printf("- %s (PF_INET6)\n", ifa->ifa_name);
-		else
-			printf("- %s (Unknown)\n", ifa->ifa_name);
-	}
+	printf(" > addr->sll_family     %hu\n", addr->sll_family);
+	printf(" > addr->sll_protocol   %hu\n", addr->sll_protocol);
+	printf(" > addr->sll_ifindex    %d\n", addr->sll_ifindex);
+	printf(" > addr->sll_hatype     %hu\n", addr->sll_hatype);
+	printf(" > addr->sll_pkttype    %d\n", addr->sll_pkttype);
+	printf(" > addr->sll_halen      %d\n", addr->sll_halen);
+	printf(" > addr->sll_addr       %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", addr->sll_addr[0], addr->sll_addr[1], addr->sll_addr[2], addr->sll_addr[3], addr->sll_addr[4], addr->sll_addr[5], addr->sll_addr[6], addr->sll_addr[7]);
 	printf("\n");
 }

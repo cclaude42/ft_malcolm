@@ -60,8 +60,7 @@ int main (int ac, char **av)
 
 	while (1)
 	{
-		if (recvfrom(packet_socket, packet, 1000, 0, (struct sockaddr *)&addr, &addrlen) != ETHER_HDR_LEN + ETHER_ARP_LEN)
-			continue ;
+		recvfrom(packet_socket, packet, 1000, 0, (struct sockaddr *)&addr, &addrlen);
 
 		eth = (struct ethhdr *)packet;
 		arp = (struct ether_arp *)(packet + ETHER_HDR_LEN);

@@ -69,10 +69,10 @@ int is_ip (char *str)
 
 int error_check (int ac, char **av)
 {
-	if (ac < 5)
-		printf("ft_malcolm: missing parameters (should have 4)\n");
-	else if (ac > 5)
-		printf("ft_malcolm: extra parameters (should have 4)\n");
+	if (getuid() != 0)
+		printf("ft_malcolm: user is non-root (must have root privileges)\n");
+	else if (ac != 5)
+		printf("ft_malcolm: usage: sudo ./ft_malcolm <source IP> <source MAC> <target IP> <target MAC>\n\tex: sudo ./ft_malcolm 192.168.1.1 aa:bb:cc:dd:ee:ff 192.168.1.2 dc:83:de:6c:e5:b3\n");
 	else if (is_ip(av[1]))
 		printf("ft_malcolm: first argument is invalid ip address (%s)\n", av[1]);
 	else if (is_mac(av[2]))

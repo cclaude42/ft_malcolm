@@ -45,4 +45,8 @@ fclean:
 
 re: fclean all
 
-.PHONY: clean fclean re
+setup: re
+	rm -rf .vagrant
+	vagrant up
+
+.PHONY: clean fclean re setup

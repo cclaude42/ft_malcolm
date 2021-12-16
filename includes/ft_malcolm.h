@@ -41,7 +41,7 @@ void fill_mac (unsigned char *addr, char *mac);
 void memcopy (unsigned char *src, unsigned char *dst, size_t n);
 int	cmp(const char *s1, const char *s2);
 
-void print_arp (struct ethhdr *eth, struct ether_arp *arp);
+void print_arp (char *type, struct ethhdr *eth, struct ether_arp *arp);
 void print_addrll (struct sockaddr_ll *addr);
 
 #endif

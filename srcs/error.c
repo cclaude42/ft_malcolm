@@ -82,7 +82,7 @@ int error_check (int ac, char **av)
 	if (getuid() != 0)
 		printf("ft_malcolm: user is non-root (must have root privileges)\n");
 	else if ((ac != 5 && ac != 6) || (ac == 6 && is_verbose(av[5])))
-		printf("ft_malcolm: usage: sudo ./ft_malcolm <source IP> <source MAC> <target IP> <target MAC>\n\tex: sudo ./ft_malcolm 192.168.1.1 aa:bb:cc:dd:ee:ff 192.168.1.2 dc:83:de:6c:e5:b3\n");
+		printf("ft_malcolm: usage: sudo ./ft_malcolm <probed IP> <spoofed MAC> <sender IP> <sender MAC>\n\tIP format is 1.1.1.1, MAC format is aa:bb:cc:dd:ee:ff\n\tfirst argument is the IP you ping, second is the MAC address you want to spoof,\n\tthird and fourth arguments are identifiers of the machine doing the pinging\n");
 	else if (is_ip(av[1]))
 		printf("ft_malcolm: first argument is invalid ip address (%s)\n", av[1]);
 	else if (is_mac(av[2]))

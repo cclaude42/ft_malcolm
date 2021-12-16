@@ -39,10 +39,7 @@ void my_mac (unsigned char *addr, int ifindex)
 void edit_packet (struct ethhdr *eth, struct ether_arp *arp, char **av, int ifindex, int verbose)
 {
 	if (verbose)
-	{
-		printf("%sARP request :%s\n", CYAN, RESET);
-		print_arp(eth, arp);
-	}
+		print_arp(" ARP request received ", eth, arp);
 
 	my_mac(eth->h_source, ifindex);
 	fill_mac(eth->h_dest, av[4]);
@@ -54,10 +51,7 @@ void edit_packet (struct ethhdr *eth, struct ether_arp *arp, char **av, int ifin
 	fill_mac(arp->arp_tha, av[4]);
 
 	if (verbose)
-	{
-		printf("%sGenerated ARP reply :%s\n", CYAN, RESET);
-		print_arp(eth, arp);
-	}
+		print_arp("Constructing ARP reply", eth, arp);
 }
 
 int main (int ac, char **av)
@@ -94,14 +88,14 @@ int main (int ac, char **av)
 			break ;
 	}
 
-	printf("Received ARP request !\n");
-	printf("%s%s asks : Who is %s ?\n\n%s", RED, av[3], av[1], RESET);
+	printf("Received %sARP request%s !\n", CYAN, RESET);
+	printf("%s%s%s asks : %sWho is %s ?%s\n\n", YELLOW, av[3], RESET, RED, av[1], RESET);
 
 	edit_packet(eth, arp, av, addr.sll_ifindex, av[5] != NULL);
 
 	sendto(packet_socket, packet, ETHER_HDR_LEN + ETHER_ARP_LEN, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_ll));
 
-	printf("Sent spoofed ARP reply, check ARP table on target !\n");
+	printf("Sent spoofed %sARP reply%s, check ARP table on target !\n\n", CYAN, RESET);
 
 	close(packet_socket);
 

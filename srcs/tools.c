@@ -33,7 +33,7 @@ void memcopy (unsigned char *src, unsigned char *dst, size_t n)
 		*src++ = *dst++;
 }
 
-int	cmp(const char *s1, const char *s2)
+int	cmp (const char *s1, const char *s2)
 {
 	size_t	i;
 

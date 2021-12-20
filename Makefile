@@ -23,25 +23,25 @@ OBJ = $(SRC:c=o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	@echo "\033[0;32m\n\nCompiling ft_malcolm..."
+	@printf "\033[0;32m\n\nCompiling %s...\n" $(NAME)
 	@$(CC) $(CFLAGS) $(INCLUDES) -o $(NAME) $(OBJ)
-	@echo "\n\033[0mDone !"
+	@printf "\n\033[0mDone !\n"
 
 %.o: %.c
-	@printf "\033[0;33mGenerating ft_malcolm objects... %-20.20s\r" $@
+	@printf "\033[0;33mGenerating %s objects... %-20.20s\r" $(NAME) $@
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	@echo "\033[0;31m\nDeleting ft_malcolm objects..."
+	@printf "\033[0;31m\nDeleting %s objects...\n" $(NAME)
 	@rm -f $(OBJ)
-	@echo "\033[0m"
+	@printf "\033[0m\n"
 
 fclean:
-	@echo "\033[0;31m\nDeleting ft_malcolm objects..."
+	@printf "\033[0;31m\nDeleting %s objects...\n" $(NAME)
 	@rm -f $(OBJ)
-	@echo "\nDeleting ft_malcolm executable..."
+	@printf "\nDeleting %s executable...\n" $(NAME)
 	@rm -f $(NAME)
-	@echo "\033[0m"
+	@printf "\033[0m\n"
 
 re: fclean all
 

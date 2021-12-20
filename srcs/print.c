@@ -15,6 +15,7 @@
 void format_print (char *type, char *desc, char *content, char *comment)
 {
 	char *c1;
+
 	if (!cmp(type, "ETH"))
 		c1 = RED;
 	else
@@ -77,16 +78,4 @@ void print_arp (char *type, struct ethhdr *eth, struct ether_arp *arp)
 	format_print("ARP", "Target protocol address", buffer, "");
 	
 	printf("|\n\n");
-}
-
-void print_addrll (struct sockaddr_ll *addr)
-{
-	printf(" > addr->sll_family     %hu\n", addr->sll_family);
-	printf(" > addr->sll_protocol   %hu\n", addr->sll_protocol);
-	printf(" > addr->sll_ifindex    %d\n", addr->sll_ifindex);
-	printf(" > addr->sll_hatype     %hu\n", addr->sll_hatype);
-	printf(" > addr->sll_pkttype    %d\n", addr->sll_pkttype);
-	printf(" > addr->sll_halen      %d\n", addr->sll_halen);
-	printf(" > addr->sll_addr       %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", addr->sll_addr[0], addr->sll_addr[1], addr->sll_addr[2], addr->sll_addr[3], addr->sll_addr[4], addr->sll_addr[5], addr->sll_addr[6], addr->sll_addr[7]);
-	printf("\n");
 }
